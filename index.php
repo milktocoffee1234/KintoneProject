@@ -8,63 +8,50 @@
 <p>
 <?php
  
-// HTTP_Request2
-require_once 'HTTP/Request2.php';
- 
-// 認証設定
-$subDomain = "acrovision90";
-$loginName = "goto.masaki@acrovision.jp";
-$password = "goto0126";
-$apiToken = "VMwH52cdbrcDRXTPxuaYW27ex3bMg0Q54qBJhQqq";
+	// 自分のkintoneの設定
+	define("API_TOKEN", "VMwH52cdbrcDRXTPxuaYW27ex3bMg0Q54qBJhQqq"); 
+	define("SUB_DOMAIN", "acrovision90"); 
+	define("APP_NO", "16"); 
 
- 
-// アプリID
-$appId = 16;
-$record = 16;
- 
-// リクエストヘッダ
-$header = array(
-    "Host: " . $subDomain . ".cybozu.com:443",
-    "Content-Type: application/json",
-    "X-Cybozu-API-Token: ".$apiToken
-);
- 
-try {
-    // リクエスト作成
-    $request = new HTTP_Request2();
-    $request->setHeader($header);
-    $request->setUrl("https://" . $subDomain . ".cybozu.com/k/v1/record.json");
-    $request->setMethod(HTTP_Request2::METHOD_GET);
-    $request->setBody(json_encode(array("app" => $appId)));
-    $request->setBody(json_encode(array("id" => 16)));
 
-    $request->setConfig(array(
-      'ssl_verify_host' => false,
-      'ssl_verify_peer' => false
-    ));
- 
-    // レスポンス取得
-   $response = $request->send();
+	//サーバ送信するHTTPヘッダを設定
+	$options = array(
+	    'http'=>array(
+	        'method'=>'GET',
+	        'header'=> "X-Cybozu-API-Token:". API_TOKEN ."\r\n"
+	    )
+	);
+	//コンテキストを生成
+	$context = stream_context_create( $options );
+	// サーバに接続してデータを貰う
+	$contents = file_get_contents( 'https://'. SUB_DOMAIN .'.cybozu.com/k/v1/records.json?app='. APP_NO , FALSE, $context );
 
-// HTTP_Request2のエラーを表示
-} catch (HTTP_Request2_Exception $e) {
-    die($e->getMessage());
-// それ以外のエラーを表示
-} catch (Exception $e) {
-    die($e->getMessage());
-}
- 
-// エラー時
-if ($response->getStatus() != "200") {
-  echo sprintf("status: %s\n", $response->getStatus());
-  echo sprintf("cybozu error: %s\n", $response->getHeader('x-cybozu-error'));
-  echo sprintf("body: \n%s\n", $response->getBody());
-  die;
-}
- 
-$data = json_decode($response->getBody(), true);
-var_dump($data);
+	//var_dump($http_response_header); //ヘッダ表示
+	
+	//JSON形式からArrayに変換
+	$data = json_decode($contents, true);
 
+	//表示は単純なテーブルで
+	$str  = "<table border='1'>";
+	$str .= "<tr>";
+	$str .= "<th>レコード番号</th>";
+	$str .= "<th>作成日時</th>";
+	$str .= "<th>作成者</th>";	
+	$str .= "<th>名前</th>";
+	$str .= "</tr>";
+	
+	for($i=0; $i<count($data['records']); $i++){
+		$str .= "<tr>";
+		$str .= sprintf("<td>%s</td>", $data['records'][$i]['レコード番号']['value']);
+		$str .= sprintf("<td>%s</td>", $data['records'][$i]['作成日時']['value']);
+		$str .= sprintf("<td>%s</td>", $data['records'][$i]['作成者']['value']['name']);
+		$str .= sprintf("<td>%s</td>", $data['records'][$i]['名前']['value']);
+		$str .= "</tr>";		
+	}
+	$str .= "</table>";
+	
+	//画面に出力
+	echo $str;
 ?>
 
 </p>
