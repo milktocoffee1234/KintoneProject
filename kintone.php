@@ -11,7 +11,8 @@
 <p>
 <?php
 // HTTP_Request2
-require_once 'HTTP/Request2.php';
+require_once 'dirname(__FILE__)."/../HTTP/Request2.php"';
+
 
 // 認証設定
 $subDomain = "acrovision90";
