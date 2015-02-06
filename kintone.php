@@ -12,7 +12,7 @@
 <?php
 // HTTP_Request2
 require_once 'HTTP/Request2.php';
- 
+
 // 認証設定
 $subDomain = "acrovision90";
 $loginName = "goto.masaki@acrovision.jp";
@@ -37,10 +37,10 @@ try {
     $request->setBody(json_encode(array("app" => $appId,
     									"record" => array(
     										"名前" => array(
-    												"value" => "テスト太郎"
+    												"value" => $_POST["name"]
     										),
     										"内容" => array(
-    												"value" => "アップロードできました"
+    												"value" => $_POST["textform"]
     										)
     									)
     									)));
